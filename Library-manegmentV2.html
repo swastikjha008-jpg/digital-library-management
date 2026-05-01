@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Library Management V2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f2f6fb;
+      --panel: rgba(255, 255, 255, 0.9);
+      --panel-strong: #ffffff;
+      --line: #dbe5f1;
+      --line-strong: #cad7e7;
+      --text: #172132;
+      --muted: #69778d;
+      --blue: #5b84f1;
+      --blue-soft: #eaf0ff;
+      --mint: #4ba87f;
+      --mint-soft: #e9f8f1;
+      --gold: #f0b964;
+      --gold-soft: #fff4df;
+      --rose: #e2869e;
+      --rose-soft: #fff0f4;
+      --navy: #122034;
+      --shadow: 0 20px 60px rgba(21, 40, 68, 0.08);
+      --shadow-soft: 0 12px 30px rgba(29, 49, 78, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(91, 132, 241, 0.15), transparent 24%),
+        radial-gradient(circle at 82% 8%, rgba(240, 185, 100, 0.14), transparent 18%),
+        linear-gradient(180deg, #f6f9fd 0%, #eef3f9 100%);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 1.6rem;
+      color: #f5f8fc;
+      background:
+        radial-gradient(circle at top left, rgba(145, 178, 255, 0.18), transparent 20%),
+        linear-gradient(180deg, #101a2b 0%, #15243a 100%);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .brand-mark {
+      width: 3.1rem;
+      height: 3.1rem;
+      display: grid;
+      place-items: center;
+      border-radius: 1rem;
+      font-weight: 800;
+      color: #102034;
+      background: linear-gradient(135deg, #a8c2ff, #ffe3ab);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .brand strong,
+    .topbar h1,
+    .hero-copy h2,
+    .panel-head h3,
+    .detail-card h3,
+    .book-card h4,
+    .modal-card h2 {
+      display: block;
+      margin: 0;
+    }
+
+    .brand span,
+    .sidebar-note p,
+    .hero-copy p,
+    .book-card p,
+    .issue-item p,
+    .member-item p,
+    .detail-card p,
+    .modal-note,
+    .field-help {
+      color: inherit;
+    }
+
+    .side-nav {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .side-link {
+      padding: 0.9rem 1rem;
+      text-align: left;
+      color: #d1dded;
+      border: 1px solid transparent;
+      border-radius: 1rem;
+      background: transparent;
+      cursor: default;
+    }
+
+    .side-link.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-note {
+      margin-top: 2rem;
+      padding: 1.1rem;
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #d7e2f0;
+    }
+
+    .sidebar-note strong {
+      display: block;
+      margin-top: 0.25rem;
+      color: #ffffff;
+    }
+
+    .main {
+      padding: 1.4rem;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .topbar h1 {
+      font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+    }
+
+    .mini-label {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input,
+    .modal-card input,
+    .modal-card textarea {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .search-input {
+      width: min(360px, 40vw);
+    }
+
+    .search-input:focus,
+    .modal-card input:focus,
+    .modal-card textarea:focus {
+      border-color: #b9c8df;
+    }
+
+    .primary-button,
+    .ghost-button,
+    .filter-chip,
+    .tag-pill {
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .primary-button,
+    .ghost-button,
+    .filter-chip {
+      cursor: pointer;
+    }
+
+    .primary-button {
+      padding: 0.92rem 1.2rem;
+      border: 0;
+      font-weight: 700;
+      color: #102038;
+      background: linear-gradient(135deg, #9bc0ff, #ffd89a);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .ghost-button {
+      padding: 0.82rem 1rem;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--text);
+    }
+
+    .primary-button:hover,
+    .ghost-button:hover,
+    .book-card:hover,
+    .filter-chip:hover,
+    .trend-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero,
+    .panel,
+    .trend-card,
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.9fr);
+      gap: 1rem;
+      padding: 1.2rem;
+      border-radius: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-copy h2 {
+      margin: 0.35rem 0 0.65rem;
+      font-size: clamp(1.6rem, 2.1vw, 2.35rem);
+      line-height: 1.2;
+    }
+
+    .hero-copy p:last-child,
+    .detail-card p,
+    .issue-item p,
+    .member-item p,
+    .modal-note,
+    .field-help {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .hero-stats,
+    .trend-grid,
+    .content-grid,
+    .bottom-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card {
+      padding: 1rem;
+      border-radius: 1.25rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-card strong {
+      display: block;
+      margin: 0.2rem 0;
+      font-size: 1.8rem;
+    }
+
+    .stat-card.blue {
+      background: linear-gradient(180deg, var(--blue-soft), #ffffff);
+    }
+
+    .stat-card.gold {
+      background: linear-gradient(180deg, var(--gold-soft), #ffffff);
+    }
+
+    .stat-card.green {
+      background: linear-gradient(180deg, var(--mint-soft), #ffffff);
+    }
+
+    .stat-card.rose {
+      background: linear-gradient(180deg, var(--rose-soft), #ffffff);
+    }
+
+    .trend-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 1rem;
+    }
+
+    .trend-card {
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr);
+      gap: 0.9rem;
+      align-items: center;
+      padding: 0.85rem;
+      border-radius: 1.3rem;
+    }
+
+    .trend-cover {
+      width: 74px;
+      height: 98px;
+      object-fit: cover;
+      border-radius: 0.95rem;
+      box-shadow: 0 10px 24px rgba(17, 34, 58, 0.12);
+    }
+
+    .trend-card strong {
+      display: block;
+      margin-bottom: 0.22rem;
+    }
+
+    .content-grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(310px, 0.85fr);
+      margin-bottom: 1rem;
+    }
+
+    .bottom-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .panel {
+      padding: 1.15rem;
+      border-radius: 1.6rem;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .filter-chip {
+      padding: 0.62rem 0.95rem;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--muted);
+    }
+
+    .filter-chip.active {
+      border-color: #bfd0e7;
+      background: #eff5ff;
+      color: var(--text);
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.95rem;
+    }
+
+    .book-card {
+      overflow: hidden;
+      border-radius: 1.35rem;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .book-card.active {
+      border-color: #b8cbe8;
+      box-shadow: 0 18px 34px rgba(40, 71, 111, 0.12);
+    }
+
+    .book-image {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      background: #dce7f5;
+    }
+
+    .book-body {
+      padding: 0.95rem;
+    }
+
+    .book-card h4 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .book-card p {
+      margin: 0.3rem 0 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .book-meta {
+      margin-top: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.36rem 0.68rem;
+      font-size: 0.77rem;
+      font-weight: 700;
+    }
+
+    .tag-pill.available {
+      color: #187a56;
+      background: #e7f8ef;
+    }
+
+    .tag-pill.issued {
+      color: #91600d;
+      background: #fff1d9;
+    }
+
+    .tag-pill.full {
+      color: #9a4259;
+      background: #ffe7ee;
+    }
+
+    .detail-card {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .detail-image {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      border-radius: 1.2rem;
+      box-shadow: var(--shadow-soft);
+      background: #dce7f5;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 0.68rem;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .detail-list strong {
+      color: var(--text);
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .issue-list,
+    .member-list {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .issue-item,
+    .member-item {
+      padding: 0.95rem 1rem;
+      border-radius: 1.25rem;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .issue-item strong,
+    .member-item strong {
+      display: block;
+      margin-bottom: 0.22rem;
+    }
+
+    .issue-meta,
+    .member-meta {
+      margin-top: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .member-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .member-main {
+      display: flex;
+      gap: 0.82rem;
+      align-items: center;
+    }
+
+    .member-avatar {
+      width: 3rem;
+      height: 3rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      font-weight: 700;
+      color: #15304c;
+      background: linear-gradient(135deg, #d8e5ff, #ffeabf);
+    }
+
+    .empty-state {
+      padding: 1rem;
+      border-radius: 1.25rem;
+      color: var(--muted);
+      background: #f8fbff;
+      border: 1px dashed var(--line-strong);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(10, 20, 34, 0.45);
+      backdrop-filter: blur(6px);
+      z-index: 20;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(100%, 560px);
+      max-height: 92vh;
+      overflow: auto;
+      padding: 1.2rem;
+      border-radius: 1.6rem;
+      background: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 24px 70px rgba(17, 34, 57, 0.18);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .close-button {
+      width: 2.4rem;
+      height: 2.4rem;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .modal-form {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .field label {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .modal-card textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .notice-box {
+      padding: 0.95rem 1rem;
+      border-radius: 1rem;
+      background: #fff7e8;
+      border: 1px solid #ffe4af;
+      color: #8f610f;
+      font-size: 0.94rem;
+      line-height: 1.55;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    @media (max-width: 1180px) {
+      .app-shell,
+      .hero,
+      .content-grid,
+      .bottom-grid,
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .trend-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-actions,
+      .detail-actions,
+      .member-item,
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-actions,
+      .detail-actions,
+      .member-item {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .catalog-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">DL</div>
+        <div>
+          <strong>Library V2</strong>
+          <span>Frontend project upgrade</span>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="side-link active" type="button">Dashboard</button>
+        <button class="side-link" type="button">Books</button>
+        <button class="side-link" type="button">Issued Records</button>
+        <button class="side-link" type="button">Members</button>
+      </nav>
+
+      <div class="sidebar-note">
+        <span class="mini-label">Simple Rule</span>
+        <strong>Return within 7 days</strong>
+        <p>Every issued book should be returned in 7 days, otherwise a fine notice applies.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <span class="mini-label">Digital Library Management V2</span>
+          <h1>Manage books, borrowers, and issue tracking in one clean page.</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <input id="search-input" class="search-input" type="text" placeholder="Search by title, author, category, or ID">
+          <button id="open-add-modal" class="primary-button" type="button">Add Book</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="mini-label">Overview</span>
+          <h2>A beautiful v2 frontend with working add-book and issue-book flows.</h2>
+          <p>
+            This version keeps the features focused: add books, see unique book IDs, issue books with borrower details,
+            track when a book was issued, and remind users that books must be returned in 7 days or a fine may apply.
+          </p>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-card blue">
+            <span class="mini-label">Total Books</span>
+            <strong id="total-books-count">0</strong>
+            <small>Books currently in the catalog</small>
+          </div>
+          <div class="stat-card gold">
+            <span class="mini-label">Issued Now</span>
+            <strong id="issued-books-count">0</strong>
+            <small>Books currently with readers</small>
+          </div>
+          <div class="stat-card green">
+            <span class="mini-label">Available Copies</span>
+            <strong id="available-copies-count">0</strong>
+            <small>Ready for the next issue</small>
+          </div>
+          <div class="stat-card rose">
+            <span class="mini-label">Trending Books</span>
+            <strong id="trending-books-count">0</strong>
+            <small>Highlighted popular picks</small>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-head">
+          <div>
+            <span class="mini-label">Trending</span>
+            <h3>Popular Books Right Now</h3>
+          </div>
+        </div>
+        <div id="trending-grid" class="trend-grid"></div>
+      </section>
+
+      <section class="content-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="mini-label">Catalog</span>
+              <h3>Books Collection</h3>
+            </div>
+            <div class="filter-row">
+              <button class="filter-chip active" data-filter="all" type="button">All</button>
+              <button class="filter-chip" data-filter="available" type="button">Available</button>
+              <button class="filter-chip" data-filter="issued" type="button">Issued</button>
+              <button class="filter-chip" data-filter="trending" type="button">Trending</button>
+            </div>
+          </div>
+          <div id="catalog-grid" class="catalog-grid"></div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="mini-label">Details</span>
+              <h3>Selected Book</h3>
+            </div>
+          </div>
+          <div id="detail-card" class="detail-card"></div>
+        </aside>
+      </section>
+
+      <section class="bottom-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="mini-label">Issued Tracker</span>
+              <h3>Current Issued Books</h3>
+            </div>
+          </div>
+          <div id="issue-list" class="issue-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="mini-label">Readers</span>
+              <h3>Recent Borrowers</h3>
+            </div>
+          </div>
+          <div id="member-list" class="member-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="add-modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="mini-label">Add Book</span>
+          <h2>Add a new book to the library</h2>
+          <p class="modal-note">Every book gets its own unique ID automatically.</p>
+        </div>
+        <button class="close-button" data-close="add-modal" type="button">×</button>
+      </div>
+
+      <form id="add-book-form" class="modal-form">
+        <div class="field-grid">
+          <div class="field">
+            <label for="book-title">Book title</label>
+            <input id="book-title" type="text" required>
+          </div>
+          <div class="field">
+            <label for="book-author">Author</label>
+            <input id="book-author" type="text" required>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="book-category">Category</label>
+            <input id="book-category" type="text" required>
+          </div>
+          <div class="field">
+            <label for="book-copies">Copies</label>
+            <input id="book-copies" type="number" min="1" value="1" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="book-image">Book image URL</label>
+          <input id="book-image" type="url" placeholder="Optional image URL">
+          <span class="field-help">If left empty, a clean default cover image will be created automatically.</span>
+        </div>
+
+        <div class="field">
+          <label for="book-summary">Short summary</label>
+          <textarea id="book-summary" required></textarea>
+        </div>
+
+        <div class="field">
+          <label>
+            <input id="book-trending" type="checkbox">
+            Mark as trending book
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="ghost-button" data-close="add-modal" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="issue-modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="mini-label">Issue Book</span>
+          <h2>Issue selected book to a reader</h2>
+          <p id="issue-book-label" class="modal-note"></p>
+        </div>
+        <button class="close-button" data-close="issue-modal" type="button">×</button>
+      </div>
+
+      <div class="notice-box">
+        The reader must return the book within <strong>7 days</strong>. If the book is not returned on time, a fine notice applies.
+      </div>
+
+      <form id="issue-book-form" class="modal-form">
+        <div class="field-grid">
+          <div class="field">
+            <label for="issuer-name">Borrower name</label>
+            <input id="issuer-name" type="text" required>
+          </div>
+          <div class="field">
+            <label for="issuer-phone">Phone number</label>
+            <input id="issuer-phone" type="tel" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="issue-note">Optional note</label>
+          <textarea id="issue-note" placeholder="Semester use, project reading, personal reading..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="ghost-button" data-close="issue-modal" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Issue for 7 Days</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function coverFromText(title, toneOne, toneTwo) {
+      const safeTitle = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 440">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="${toneOne}"/>
+              <stop offset="100%" stop-color="${toneTwo}"/>
+            </linearGradient>
+          </defs>
+          <rect width="320" height="440" rx="28" fill="url(#g)"/>
+          <circle cx="258" cy="68" r="42" fill="rgba(255,255,255,0.15)"/>
+          <rect x="28" y="58" width="132" height="10" rx="5" fill="rgba(255,255,255,0.22)"/>
+          <rect x="28" y="82" width="92" height="10" rx="5" fill="rgba(255,255,255,0.18)"/>
+          <text x="28" y="260" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="700">${safeTitle}</text>
+          <rect x="28" y="328" width="264" height="2" fill="rgba(255,255,255,0.2)"/>
+          <text x="28" y="372" fill="rgba(255,255,255,0.86)" font-family="Arial, sans-serif" font-size="20">Digital Library Edition</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    const books = [
+      {
+        id: "BK-1001",
+        title: "Atomic Habits",
+        author: "James Clear",
+        category: "Self Growth",
+        summary: "A practical book about small habits, systems, and long-term improvement.",
+        image: coverFromText("Atomic Habits", "#5b84f1", "#223a67"),
+        totalCopies: 6,
+        availableCopies: 4,
+        trending: true
+      },
+      {
+        id: "BK-1002",
+        title: "Deep Work",
+        author: "Cal Newport",
+        category: "Productivity",
+        summary: "Focus-driven productivity strategies for doing meaningful work in a distracted world.",
+        image: coverFromText("Deep Work", "#f0b964", "#7f5b20"),
+        totalCopies: 4,
+        availableCopies: 3,
+        trending: true
+      },
+      {
+        id: "BK-1003",
+        title: "The Psychology of Money",
+        author: "Morgan Housel",
+        category: "Finance",
+        summary: "Stories and lessons about decision-making, wealth, and human behavior.",
+        image: coverFromText("Psychology of Money", "#4ba87f", "#205944"),
+        totalCopies: 5,
+        availableCopies: 5,
+        trending: false
+      },
+      {
+        id: "BK-1004",
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        category: "Programming",
+        summary: "A software engineering classic about writing readable and maintainable code.",
+        image: coverFromText("Clean Code", "#946de4", "#4d3370"),
+        totalCopies: 3,
+        availableCopies: 2,
+        trending: true
+      },
+      {
+        id: "BK-1005",
+        title: "Ikigai",
+        author: "Hector Garcia",
+        category: "Lifestyle",
+        summary: "A gentle exploration of purpose, longevity, and balanced daily living.",
+        image: coverFromText("Ikigai", "#e2869e", "#7b3047"),
+        totalCopies: 7,
+        availableCopies: 6,
+        trending: false
+      }
+    ];
+
+    const issuedBooks = [
+      {
+        recordId: "IS-501",
+        bookId: "BK-1001",
+        borrowerName: "Meera Patel",
+        phone: "9876543210",
+        issueDate: "2026-04-29",
+        note: "Habit building reading"
+      },
+      {
+        recordId: "IS-502",
+        bookId: "BK-1004",
+        borrowerName: "Rohan Verma",
+        phone: "9123456780",
+        issueDate: "2026-04-27",
+        note: "Coding practice"
+      },
+      {
+        recordId: "IS-503",
+        bookId: "BK-1002",
+        borrowerName: "Aarav Sharma",
+        phone: "9988776655",
+        issueDate: "2026-04-30",
+        note: "Project focus"
+      }
+    ];
+
+    let activeFilter = "all";
+    let activeBookId = books[0].id;
+    let currentIssueBookId = books[0].id;
+
+    function todayDate() {
+      return new Date("2026-05-01T00:00:00");
+    }
+
+    function addDays(dateString, days) {
+      const value = new Date(`${dateString}T00:00:00`);
+      value.setDate(value.getDate() + days);
+      return value;
+    }
+
+    function daysBetween(fromDate, toDate) {
+      const diff = toDate.getTime() - fromDate.getTime();
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function getBookById(bookId) {
+      return books.find((book) => book.id === bookId);
+    }
+
+    function getIssuedCountForBook(bookId) {
+      return issuedBooks.filter((record) => record.bookId === bookId).length;
+    }
+
+    function bookStatus(book) {
+      if (book.availableCopies <= 0) return "full";
+      if (getIssuedCountForBook(book.id) > 0) return "issued";
+      return "available";
+    }
+
+    function statValueTotalAvailableCopies() {
+      return books.reduce((sum, book) => sum + book.availableCopies, 0);
+    }
+
+    function renderStats() {
+      document.getElementById("total-books-count").textContent = String(books.length);
+      document.getElementById("issued-books-count").textContent = String(issuedBooks.length);
+      document.getElementById("available-copies-count").textContent = String(statValueTotalAvailableCopies());
+      document.getElementById("trending-books-count").textContent = String(books.filter((book) => book.trending).length);
+    }
+
+    function renderTrendingBooks() {
+      const grid = document.getElementById("trending-grid");
+      grid.innerHTML = "";
+
+      const trendingBooks = books.filter((book) => book.trending).slice(0, 3);
+      trendingBooks.forEach((book) => {
+        const card = document.createElement("article");
+        card.className = "trend-card";
+        card.innerHTML = `
+          <img class="trend-cover" src="${book.image}" alt="${book.title} cover">
+          <div>
+            <strong>${book.title}</strong>
+            <p>${book.author}</p>
+            <span class="mini-label">${book.id}</span>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          activeBookId = book.id;
+          renderCatalog();
+          renderBookDetail();
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCatalog() {
+      const grid = document.getElementById("catalog-grid");
+      const searchValue = document.getElementById("search-input").value.trim().toLowerCase();
+      grid.innerHTML = "";
+
+      const visibleBooks = books.filter((book) => {
+        const status = bookStatus(book);
+        const matchesFilter = activeFilter === "all" || status === activeFilter || (activeFilter === "trending" && book.trending);
+        const haystack = `${book.id} ${book.title} ${book.author} ${book.category}`.toLowerCase();
+        return matchesFilter && haystack.includes(searchValue);
+      });
+
+      visibleBooks.forEach((book) => {
+        const status = bookStatus(book);
+        const card = document.createElement("article");
+        card.className = "book-card";
+        if (book.id === activeBookId) card.classList.add("active");
+
+        card.innerHTML = `
+          <img class="book-image" src="${book.image}" alt="${book.title} cover">
+          <div class="book-body">
+            <span class="mini-label">${book.id}</span>
+            <h4>${book.title}</h4>
+            <p>${book.author}</p>
+            <div class="book-meta">
+              <span class="tag-pill ${status}">${status === "full" ? "No Copies Left" : status === "issued" ? "Issued" : "Available"}</span>
+              <span>${book.availableCopies}/${book.totalCopies} available</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          activeBookId = book.id;
+          currentIssueBookId = book.id;
+          renderCatalog();
+          renderBookDetail();
+        });
+
+        grid.appendChild(card);
+      });
+
+      if (!visibleBooks.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "No books match this search or filter.";
+        grid.appendChild(empty);
+      }
+    }
+
+    function renderBookDetail() {
+      const detail = document.getElementById("detail-card");
+      const book = getBookById(activeBookId);
+
+      if (!book) {
+        detail.innerHTML = `<div class="empty-state">Select a book to see more details.</div>`;
+        return;
+      }
+
+      const status = bookStatus(book);
+      detail.innerHTML = `
+        <img class="detail-image" src="${book.image}" alt="${book.title} cover">
+        <div>
+          <span class="mini-label">${book.id}</span>
+          <h3>${book.title}</h3>
+          <p>${book.summary}</p>
+        </div>
+        <div class="detail-list">
+          <div><strong>Author:</strong> ${book.author}</div>
+          <div><strong>Category:</strong> ${book.category}</div>
+          <div><strong>Total copies:</strong> ${book.totalCopies}</div>
+          <div><strong>Available copies:</strong> ${book.availableCopies}</div>
+          <div><strong>Status:</strong> ${status === "full" ? "No copies left" : status}</div>
+        </div>
+        <div class="detail-actions">
+          <button id="issue-selected-book" class="primary-button" type="button" ${book.availableCopies <= 0 ? "disabled" : ""}>Issue Book</button>
+          <button id="copy-book-id" class="ghost-button" type="button">Book ID: ${book.id}</button>
+        </div>
+      `;
+
+      const issueButton = document.getElementById("issue-selected-book");
+      if (issueButton) {
+        issueButton.addEventListener("click", () => {
+          currentIssueBookId = book.id;
+          openIssueModal(book.id);
+        });
+      }
+
+      document.getElementById("copy-book-id").addEventListener("click", () => {
+        navigator.clipboard?.writeText(book.id);
+      });
+    }
+
+    function renderIssueList() {
+      const list = document.getElementById("issue-list");
+      list.innerHTML = "";
+
+      if (!issuedBooks.length) {
+        list.innerHTML = `<div class="empty-state">No books are issued right now.</div>`;
+        return;
+      }
+
+      issuedBooks
+        .slice()
+        .sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate))
+        .forEach((record) => {
+          const book = getBookById(record.bookId);
+          const issuedAt = new Date(`${record.issueDate}T00:00:00`);
+          const dueDate = addDays(record.issueDate, 7);
+          const daysAgo = daysBetween(issuedAt, todayDate());
+          const daysLeft = daysBetween(todayDate(), dueDate);
+
+          const item = document.createElement("article");
+          item.className = "issue-item";
+          item.innerHTML = `
+            <strong>${book ? book.title : record.bookId}</strong>
+            <p>${record.borrowerName} · ${record.phone}</p>
+            <div class="issue-meta">
+              <span>${record.recordId}</span>
+              <span>Issued ${daysAgo} day${daysAgo === 1 ? "" : "s"} ago</span>
+              <span>Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}</span>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+    }
+
+    function renderMemberList() {
+      const list = document.getElementById("member-list");
+      list.innerHTML = "";
+
+      const grouped = {};
+      issuedBooks.forEach((record) => {
+        if (!grouped[record.borrowerName]) {
+          grouped[record.borrowerName] = {
+            name: record.borrowerName,
+            phone: record.phone,
+            count: 0
+          };
+        }
+        grouped[record.borrowerName].count += 1;
+      });
+
+      const members = Object.values(grouped);
+      if (!members.length) {
+        list.innerHTML = `<div class="empty-state">Borrower details will appear here after issuing a book.</div>`;
+        return;
+      }
+
+      members.forEach((member) => {
+        const initials = member.name
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+
+        const item = document.createElement("article");
+        item.className = "member-item";
+        item.innerHTML = `
+          <div class="member-main">
+            <div class="member-avatar">${initials}</div>
+            <div>
+              <strong>${member.name}</strong>
+              <p>${member.phone}</p>
+            </div>
+          </div>
+          <div class="member-meta">
+            <span>${member.count} active issue${member.count === 1 ? "" : "s"}</span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function openIssueModal(bookId) {
+      const book = getBookById(bookId);
+      if (!book || book.availableCopies <= 0) return;
+      currentIssueBookId = bookId;
+      document.getElementById("issue-book-label").textContent = `Selected: ${book.title} (${book.id})`;
+      document.getElementById("issue-book-form").reset();
+      openModal("issue-modal");
+    }
+
+    function nextBookId() {
+      const ids = books.map((book) => Number(book.id.replace("BK-", "")));
+      const maxId = ids.length ? Math.max(...ids) : 1000;
+      return `BK-${maxId + 1}`;
+    }
+
+    function nextIssueId() {
+      const ids = issuedBooks.map((record) => Number(record.recordId.replace("IS-", "")));
+      const maxId = ids.length ? Math.max(...ids) : 500;
+      return `IS-${maxId + 1}`;
+    }
+
+    function refreshAll() {
+      renderStats();
+      renderTrendingBooks();
+      renderCatalog();
+      renderBookDetail();
+      renderIssueList();
+      renderMemberList();
+    }
+
+    function setupFilters() {
+      document.querySelectorAll(".filter-chip").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeFilter = button.dataset.filter;
+          document.querySelectorAll(".filter-chip").forEach((chip) => {
+            chip.classList.toggle("active", chip === button);
+          });
+          renderCatalog();
+        });
+      });
+    }
+
+    function setupSearch() {
+      document.getElementById("search-input").addEventListener("input", renderCatalog);
+    }
+
+    function setupAddBookForm() {
+      document.getElementById("add-book-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const title = document.getElementById("book-title").value.trim();
+        const author = document.getElementById("book-author").value.trim();
+        const category = document.getElementById("book-category").value.trim();
+        const copies = Number(document.getElementById("book-copies").value);
+        const image = document.getElementById("book-image").value.trim();
+        const summary = document.getElementById("book-summary").value.trim();
+        const trending = document.getElementById("book-trending").checked;
+
+        const fallbackCovers = [
+          ["#5b84f1", "#223a67"],
+          ["#f0b964", "#7f5b20"],
+          ["#4ba87f", "#205944"],
+          ["#e2869e", "#7b3047"],
+          ["#946de4", "#4d3370"]
+        ];
+        const tones = fallbackCovers[books.length % fallbackCovers.length];
+
+        const book = {
+          id: nextBookId(),
+          title,
+          author,
+          category,
+          summary,
+          image: image || coverFromText(title, tones[0], tones[1]),
+          totalCopies: copies,
+          availableCopies: copies,
+          trending
+        };
+
+        books.unshift(book);
+        activeBookId = book.id;
+        currentIssueBookId = book.id;
+
+        event.target.reset();
+        closeModal("add-modal");
+        refreshAll();
+      });
+    }
+
+    function setupIssueBookForm() {
+      document.getElementById("issue-book-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const book = getBookById(currentIssueBookId);
+        if (!book || book.availableCopies <= 0) return;
+
+        const borrowerName = document.getElementById("issuer-name").value.trim();
+        const phone = document.getElementById("issuer-phone").value.trim();
+        const note = document.getElementById("issue-note").value.trim();
+
+        issuedBooks.unshift({
+          recordId: nextIssueId(),
+          bookId: book.id,
+          borrowerName,
+          phone,
+          issueDate: "2026-05-01",
+          note
+        });
+
+        book.availableCopies -= 1;
+        closeModal("issue-modal");
+        refreshAll();
+      });
+    }
+
+    function setupModals() {
+      document.getElementById("open-add-modal").addEventListener("click", () => {
+        document.getElementById("add-book-form").reset();
+        openModal("add-modal");
+      });
+
+      document.querySelectorAll("[data-close]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(button.dataset.close));
+      });
+
+      document.querySelectorAll(".modal").forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupFilters();
+      setupSearch();
+      setupModals();
+      setupAddBookForm();
+      setupIssueBookForm();
+      refreshAll();
+    });
+  </script>
+</body>
+</html>
